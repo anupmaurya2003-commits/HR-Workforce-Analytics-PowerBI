@@ -1,0 +1,59 @@
+# 👥 HR Workforce & Attrition Intelligence Analytics (Power BI)
+
+![Power BI](https://img.shields.io/badge/Power_BI-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)
+![DAX](https://img.shields.io/badge/DAX-Analysis_Services-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/Internship_Project-Complete-success?style=for-the-badge)
+
+## 📌 Project Overview
+An executive-level People Analytics & Retention solution built in Power BI, analyzing workforce demographics, employee attrition drivers, cost of turnover, and survival flight risk across 4,820 FTEs.
+
+---
+
+## 📊 Dashboard Pages & Architecture
+1. **Executive Summary Dashboard**:
+   - High-level KPIs: Active Headcount (4,820), Rolling Attrition (11.4%), Open Requisitions (142), eNPS (+46), Workforce Cost ($418.5M).
+   - Inflow/Outflow hiring vs. exit trend lines.
+   - Tenure vs. Performance early-warning flight risk matrix.
+   - Pareto exit survey drivers (Compensation & Career Growth account for 62% of exits).
+
+2. **Attrition & Retention Diagnostics**:
+   - Kaplan-Meier Tenure Survival Curve pinpointing Month 14 post-cliff dropouts.
+   - Department vs. Job Level attrition heatmap.
+   - Commute distance vs. Overtime burnout correlation scatter plot.
+   - Machine Learning flight-risk intervention dispatch table.
+
+---
+
+## 🗄️ Data Model (Star Schema)
+- **Fact Tables**: `Fact_WorkforceMonthly`, `Fact_Terminations`
+- **Dimension Tables**: `Dim_Employee`, `Dim_Department`, `Dim_Date`, `Dim_JobRole`, `Dim_ExitSurvey`
+
+---
+
+## 📐 Key DAX Measures
+
+```dax
+// 1. Total Active Headcount
+Active Headcount = 
+CALCULATE(
+    COUNTROWS(Dim_Employee),
+    FILTER(Dim_Employee, ISBLANK(Dim_Employee[TerminationDate]) || Dim_Employee[TerminationDate] > MAX(Dim_Date[Date]))
+)
+
+// 2. Annualized Rolling Attrition Rate (%)
+Rolling Attrition Rate = 
+VAR TotalExits = CALCULATE(COUNTROWS(Fact_Terminations), USERELATIONSHIP(Fact_Terminations[ExitDate], Dim_Date[Date]))
+VAR AvgHeadcount = ([Active Headcount] + [Beginning Headcount]) / 2
+RETURN
+DIVIDE(TotalExits, AvgHeadcount, 0)
+
+// 3. Early Churn Rate (< 1 Year)
+First Year Churn % = 
+DIVIDE(
+    CALCULATE(COUNTROWS(Fact_Terminations), Fact_Terminations[TenureMonths] <= 12),
+    COUNTROWS(Fact_Terminations),
+    0
+)
+💡 Key Business Takeaways
+Month 14 Cliff: Tech attrition peaks right after Month 12 stock vesting cliffs. Recommended solution: Retention bonus / refresher equity.
+Overtime & Commute Burden: Employees with >10 hrs/week overtime and >25 miles commute have a 3.8x flight risk.
